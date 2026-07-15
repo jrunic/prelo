@@ -1,0 +1,12 @@
+node_modules/
+fonts/
+*.pdf
+.DS_Store
+
+# brands locais — apenas brands/exemplo/ é rastreada
+brands/*/
+!brands/exemplo/
+!brands/exemplo/**
+
+# índices auto-gerados por domínio (brain tooling) — não versionados no repo público
+docs/81-referencia/INDEX-*.md

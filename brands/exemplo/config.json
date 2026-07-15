@@ -1,0 +1,12 @@
+{
+  "name": "Exemplo",
+  "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap",
+  "page": {
+    "format": "A4",
+    "margin": { "top": "20mm", "right": "18mm", "bottom": "24mm", "left": "18mm" }
+  },
+  "footer": {
+    "template": "<div style='font-family:Inter,sans-serif;font-size:10px;color:#888;width:100%;display:flex;justify-content:space-between;padding:0 18mm'><span>{{TITLE}}</span><span>Página <span class=\"pageNumber\"></span> de <span class=\"totalPages\"></span></span></div>",
+    "height": "12mm"
+  }
+}
