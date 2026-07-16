@@ -7,30 +7,21 @@ const os = require('os');
 
 marked.use({ gfm: true, breaks: false });
 
-function buildLocalFontTag() {
-  const fontsDir = path.resolve(__dirname, 'fonts');
-  if (!fs.existsSync(fontsDir)) return null;
+function buildLocalFontTag(brandDir, config) {
+  const fonts = config && config.fonts;
+  if (!Array.isArray(fonts) || fonts.length === 0) return null;
 
-  const slots = [
-    { family: 'Sanchez',           weight: 400, file: 'sanchez-400.woff2'           },
-    { family: 'Asap',              weight: 400, file: 'asap-400.woff2'              },
-    { family: 'Asap',              weight: 500, file: 'asap-500.woff2'              },
-    { family: 'Asap',              weight: 700, file: 'asap-700.woff2'              },
-    { family: 'Plus Jakarta Sans', weight: 400, file: 'plus-jakarta-sans-400.woff2' },
-    { family: 'Plus Jakarta Sans', weight: 600, file: 'plus-jakarta-sans-600.woff2' },
-    { family: 'Plus Jakarta Sans', weight: 800, file: 'plus-jakarta-sans-800.woff2' },
-  ];
-
+  const fontsDir = path.join(brandDir, 'fonts');
   const faces = [];
-  for (const s of slots) {
-    const filePath = path.join(fontsDir, s.file);
-    if (!fs.existsSync(filePath)) return null; // missing font → CDN fallback
+  for (const f of fonts) {
+    const filePath = path.resolve(fontsDir, f.file); // absoluto p/ file:// válido mesmo com brandDir relativo
+    if (!fs.existsSync(filePath)) continue; // degrada só esta face
     faces.push(
-      `@font-face{font-family:'${s.family}';font-weight:${s.weight};font-style:normal;` +
+      `@font-face{font-family:'${f.family}';font-weight:${f.weight};font-style:normal;` +
       `src:url('file://${filePath}')format('woff2');}`
     );
   }
-
+  if (faces.length === 0) return null; // nada resolveu → CDN
   return `<style>${faces.join('')}</style>`;
 }
 
@@ -71,7 +62,7 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
   const template = fs.readFileSync(path.resolve(__dirname, 'templates', 'base.html'), 'utf8');
 
   const content  = `<div class="content">${marked.parse(markdown)}</div>`;
-  const localFontTag = buildLocalFontTag();
+  const localFontTag = buildLocalFontTag(brandDir, config);
   const fontTag = localFontTag
     ? localFontTag
     : `<link rel="preconnect" href="https://fonts.googleapis.com">` +
@@ -113,4 +104,4 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
   }
 }
 
-module.exports = { mdToPdf };
+module.exports = { mdToPdf, buildLocalFontTag };
