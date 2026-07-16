@@ -49,6 +49,25 @@ Exemplos:
 `.trimStart());
 }
 
+function copiaPayloadMarca(origem, destino) {
+  const styleFile  = path.join(origem, 'style.css');
+  const configFile = path.join(origem, 'config.json');
+  if (!fs.existsSync(styleFile) || !fs.existsSync(configFile)) {
+    throw new Error('pasta de origem deve conter style.css e config.json');
+  }
+  fs.mkdirSync(destino, { recursive: true });
+  fs.copyFileSync(styleFile,  path.join(destino, 'style.css'));
+  fs.copyFileSync(configFile, path.join(destino, 'config.json'));
+  const copiados = ['style.css', 'config.json'];
+
+  const fontsOrigem = path.join(origem, 'fonts');
+  if (fs.existsSync(fontsOrigem) && fs.statSync(fontsOrigem).isDirectory()) {
+    fs.cpSync(fontsOrigem, path.join(destino, 'fonts'), { recursive: true });
+    for (const f of fs.readdirSync(fontsOrigem)) copiados.push(path.join('fonts', f));
+  }
+  return copiados;
+}
+
 function instalarBrand(args) {
   if (!args.brand || !args.origem) {
     process.stderr.write('Uso: prelo instalar --brand <nome> --origem <pasta>\n');
@@ -61,18 +80,13 @@ function instalarBrand(args) {
     process.exit(1);
   }
 
-  const styleFile  = path.join(origem, 'style.css');
-  const configFile = path.join(origem, 'config.json');
-
-  if (!fs.existsSync(styleFile) || !fs.existsSync(configFile)) {
-    process.stderr.write(`Erro: pasta de origem deve conter style.css e config.json\n`);
+  const destino = path.join(xdgBrandsDir(), args.brand);
+  try {
+    copiaPayloadMarca(origem, destino);
+  } catch (err) {
+    process.stderr.write(`Erro: ${err.message}\n`);
     process.exit(1);
   }
-
-  const destino = path.join(xdgBrandsDir(), args.brand);
-  fs.mkdirSync(destino, { recursive: true });
-  fs.copyFileSync(styleFile,  path.join(destino, 'style.css'));
-  fs.copyFileSync(configFile, path.join(destino, 'config.json'));
 
   process.stderr.write(`Brand '${args.brand}' instalada em ${destino}\n`);
 }
@@ -113,4 +127,8 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { copiaPayloadMarca };
