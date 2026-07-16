@@ -1,0 +1,20 @@
+{
+  "fonts": [
+    {
+      "family": "Inter",
+      "weight": 400,
+      "file": "inter-400.woff2"
+    },
+    {
+      "family": "Inter",
+      "weight": 500,
+      "file": "inter-500.woff2"
+    },
+    {
+      "family": "Inter",
+      "weight": 700,
+      "file": "inter-700.woff2"
+    }
+  ],
+  "perdas": []
+}
