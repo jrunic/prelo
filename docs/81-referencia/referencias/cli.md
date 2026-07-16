@@ -47,6 +47,20 @@ O prelo procura o diretório da marca `<marca>` nesta ordem, parando no primeiro
 
 Cada diretório de marca deve conter `style.css` e `config.json`.
 
+## Fontes por marca
+
+Cada marca pode declarar suas fontes em `config.json`:
+
+```json
+"fonts": [
+  { "family": "Inter", "weight": 400, "file": "inter-400.woff2" }
+]
+```
+
+Os arquivos `.woff2` correspondentes vivem em `<marca>/fonts/`. No render, o prelo monta `@font-face` a partir deles. Se um arquivo declarado faltar, aquela face é omitida; se nenhuma resolver (ou `fonts` ausente), usa o `googleFontsUrl` (CDN).
+
+`prelo instalar` copia a subpasta `fonts/` da origem junto com `style.css` e `config.json`.
+
 ## Saída
 
 - Com `--output`: o PDF é gravado no caminho indicado; uma linha de confirmação é escrita no stderr.

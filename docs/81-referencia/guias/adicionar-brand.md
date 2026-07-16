@@ -49,13 +49,21 @@ Uma marca é um par de arquivos: `style.css` (a aparência) e `config.json` (pá
 
    O campo `name` substitui `{{TITLE}}` no template de rodapé. `googleFontsUrl` é o fallback de fontes quando não há fontes locais.
 
-4. Instale a marca no diretório do usuário:
+4. (Opcional) Para fontes locais, gere-as na pasta da marca e declare-as em `config.json`:
+
+   ```bash
+   node scripts/download-fonts.js --url "<googleFontsUrl da marca>" --dest ~/minhas-marcas/acme/fonts
+   ```
+
+   Adicione o array `fonts` ao `config.json` com uma entrada `{family, weight, file}` por peso. Sem isso, a marca renderiza via CDN (`googleFontsUrl`).
+
+5. Instale a marca no diretório do usuário:
 
    ```bash
    prelo instalar --brand acme --origem ~/minhas-marcas/acme
    ```
 
-   Os arquivos são copiados para `~/.local/share/prelo/brands/acme/`.
+   Os arquivos — incluindo a subpasta `fonts/`, se presente — são copiados para `~/.local/share/prelo/brands/acme/`.
 
 ## Verificação
 
