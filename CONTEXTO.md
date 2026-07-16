@@ -73,15 +73,25 @@ Ordem de busca:
 - **Runtime:** Node.js 22 LTS
 - **Markdown → HTML:** `marked` v12 (GFM)
 - **HTML → PDF:** `puppeteer` v22 (Chrome headless)
-- **Fontes:** locais em `fonts/` (woff2); fallback automático para Google Fonts CDN se ausentes
+- **Fontes:** payload por-marca — cada marca declara `config.fonts` e traz seus `.woff2` em `<marca>/fonts/`; fallback automático para Google Fonts CDN (`googleFontsUrl`) quando ausentes
 
-## Fontes locais
+## Fontes por marca
 
-Baixar uma vez após `npm install`:
+Fonte é dado da marca, não do código. Cada marca declara suas fontes em `config.json`:
+
+```json
+"fonts": [ { "family": "Inter", "weight": 400, "file": "inter-400.woff2" } ]
+```
+
+Os `.woff2` vivem em `<marca>/fonts/`. No render, `buildLocalFontTag(brandDir, config)` monta `@font-face` a partir deles — degrada por face se um arquivo faltar; cai no CDN se nenhuma resolver. `prelo instalar` copia a subpasta `fonts/` junto com `style.css`+`config.json`.
+
+Gerar as fontes de uma marca (ferramenta geral):
 
 ```bash
-npm run fonts
+node scripts/download-fonts.js --url "<googleFontsUrl>" --dest <marca>/fonts
 ```
+
+`npm run fonts` roda essa ferramenta para a marca `exemplo`.
 
 ## Adicionar nova marca
 
