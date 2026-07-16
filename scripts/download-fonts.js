@@ -1,36 +1,30 @@
 #!/usr/bin/env node
 'use strict';
+// Baixa os .woff2 de uma googleFontsUrl para uma pasta e emite manifesto.json.
+// Uso: node scripts/download-fonts.js --url "<googleFontsUrl>" --dest "<pasta/fonts>"
+// Convenção de nome: <familia-kebab>-<peso>.woff2. Narrow-retry no 400 do Google.
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const GOOGLE_FONTS_URL =
-  'https://fonts.googleapis.com/css2' +
-  '?family=Sanchez:wght@400' +
-  '&family=Asap:wght@400;500;700' +
-  '&family=Plus+Jakarta+Sans:wght@400;600;800' +
-  '&display=swap';
-
-// Chrome UA para receber woff2
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
-const FONTS_DIR = path.resolve(__dirname, '..', 'fonts');
+const arg = (flag) => { const i = process.argv.indexOf(flag); return i >= 0 ? process.argv[i + 1] : null; };
 
-function fetchBuffer(url, headers = {}) {
+function fetch(url, headers = {}) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers }, (res) => {
+    https.get(url, { headers }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        resolve(fetchBuffer(res.headers.location, headers));
+        resolve(fetch(res.headers.location, headers));
         return;
       }
       const chunks = [];
       res.on('data', c => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('end', () => resolve({ status: res.statusCode, buffer: Buffer.concat(chunks) }));
       res.on('error', reject);
-    });
-    req.on('error', reject);
+    }).on('error', reject);
   });
 }
 
@@ -41,48 +35,73 @@ function parseFontFaces(css) {
   while ((m = re.exec(css)) !== null) {
     const block = m[1];
     const family = (block.match(/font-family:\s*['"]?([^'";]+)['"]?/) || [])[1]?.trim();
-    const weight = (block.match(/font-weight:\s*(\d+)/)               || [])[1]?.trim();
-    const url    = (block.match(/url\(([^)]+\.woff2)\)/)              || [])[1]?.trim();
+    const weight = (block.match(/font-weight:\s*(\d+)/) || [])[1]?.trim();
+    const url    = (block.match(/url\(([^)]+\.woff2)\)/) || [])[1]?.trim();
     if (family && weight && url) faces.push({ family, weight, url });
   }
   return faces;
 }
 
-function toFilename(family, weight) {
-  return `${family.toLowerCase().replace(/\s+/g, '-')}-${weight}.woff2`;
+const toFilename = (family, weight) => `${family.toLowerCase().replace(/\s+/g, '-')}-${weight}.woff2`;
+
+function familiesFromUrl(url) {
+  return [...url.matchAll(/family=([^:&]+)(?::[^&]*)?/g)].map(m => decodeURIComponent(m[1].replace(/\+/g, ' ')));
+}
+const narrowUrl = (families) =>
+  'https://fonts.googleapis.com/css2?' +
+  families.map(f => `family=${encodeURIComponent(f).replace(/%20/g, '+')}:wght@400`).join('&') +
+  '&display=swap';
+
+async function fetchCss(url) {
+  const r = await fetch(url, { 'User-Agent': USER_AGENT });
+  return { status: r.status, css: r.buffer.toString('utf8') };
 }
 
 async function main() {
-  fs.mkdirSync(FONTS_DIR, { recursive: true });
+  const url = arg('--url');
+  const dest = arg('--dest');
+  if (!url || !dest) {
+    process.stderr.write('Uso: node scripts/download-fonts.js --url "<googleFontsUrl>" --dest "<pasta>"\n');
+    process.exit(2);
+  }
+  fs.mkdirSync(dest, { recursive: true });
 
-  process.stdout.write('Baixando CSS do Google Fonts...\n');
-  const css = (await fetchBuffer(GOOGLE_FONTS_URL, { 'User-Agent': USER_AGENT })).toString('utf8');
-  const faces = parseFontFaces(css);
-
+  let { status, css } = await fetchCss(url);
+  const perdas = [];
+  if (status >= 400) {
+    const fams = familiesFromUrl(url);
+    process.stderr.write(`  ! Google retornou ${status}. Narrow para wght@400 de: ${fams.join(', ')}\n`);
+    perdas.push(`pesos não-400 indisponíveis para: ${fams.join(', ')}`);
+    ({ status, css } = await fetchCss(narrowUrl(fams)));
+  }
+  const faces = status < 400 ? parseFontFaces(css) : [];
   if (!faces.length) {
-    process.stderr.write('Erro: nenhuma @font-face encontrada. Verifique a URL e o User-Agent.\n');
+    process.stderr.write('Erro: nenhuma @font-face obtida (fonte proprietária? reportar lacuna).\n');
     process.exit(1);
   }
 
+  const manifesto = [];
   const seen = new Set();
   for (const face of faces) {
-    const filename = toFilename(face.family, face.weight);
-    if (seen.has(filename)) continue; // múltiplos unicode-range para mesmo peso → um arquivo só
-    seen.add(filename);
-
-    const destPath = path.join(FONTS_DIR, filename);
-    if (fs.existsSync(destPath)) {
-      process.stdout.write(`  ✓ ${filename} (já existe)\n`);
-      continue;
+    const file = toFilename(face.family, face.weight);
+    if (seen.has(file)) continue;
+    seen.add(file);
+    const destPath = path.join(dest, file);
+    if (!fs.existsSync(destPath)) {
+      const { buffer } = await fetch(face.url);
+      fs.writeFileSync(destPath, buffer);
+      process.stdout.write(`  ✓ ${file} (${Math.round(buffer.length / 1024)}KB)\n`);
+    } else {
+      process.stdout.write(`  ✓ ${file} (já existe)\n`);
     }
-
-    process.stdout.write(`  ↓ ${filename}...\n`);
-    const data = await fetchBuffer(face.url);
-    fs.writeFileSync(destPath, data);
-    process.stdout.write(`  ✓ ${filename} (${Math.round(data.length / 1024)}KB)\n`);
+    manifesto.push({ family: face.family, weight: Number(face.weight), file });
   }
-
-  process.stdout.write('Fontes prontas em fonts/\n');
+  fs.writeFileSync(path.join(dest, 'manifesto.json'), JSON.stringify({ fonts: manifesto, perdas }, null, 2));
+  process.stdout.write(`Fontes prontas em ${dest} — ${manifesto.length} arquivo(s)\n`);
 }
 
-main().catch(err => { process.stderr.write(`Erro: ${err.message}\n`); process.exit(1); });
+if (require.main === module) {
+  main().catch(err => { process.stderr.write(`Erro: ${err.message}\n`); process.exit(1); });
+}
+
+module.exports = { toFilename, parseFontFaces, familiesFromUrl, narrowUrl };

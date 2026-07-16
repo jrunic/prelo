@@ -6,7 +6,7 @@
   "main": "index.js",
   "bin": { "prelo": "./cli.js" },
   "scripts": {
-    "fonts": "node scripts/download-fonts.js",
+    "fonts": "node scripts/download-fonts.js --url \"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap\" --dest brands/exemplo/fonts",
     "test": "node --test"
   },
   "keywords": ["markdown", "pdf", "puppeteer", "cli", "brand"],
