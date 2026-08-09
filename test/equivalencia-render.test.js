@@ -12,9 +12,15 @@ const BASE = fs.readFileSync(
 
 const TOKENS = ':root{--cor-texto:#123456;--cor-titulo-forte:#654321;--peso-titulo:700}';
 
+// Fonte local (não CDN) de propósito: sem ela, buildLocalFontTag devolve null,
+// o template cai no <link> do Google Fonts e o networkidle0 do Puppeteer espera
+// a rede — a suíte trava offline. O teste é sobre camadas de CSS, não sobre
+// entrega de fonte.
+const FONTE_LOCAL = path.resolve(__dirname, '..', 'brands', 'exemplo', 'fonts', 'inter-400.woff2');
+
 const CONFIG = JSON.stringify({
   name: 'Fixture',
-  googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',
+  fonts: [{ family: 'Inter', weight: 400, file: 'inter-400.woff2' }],
   page: { format: 'A4', margin: { top: '20mm', right: '18mm', bottom: '24mm', left: '18mm' } },
 });
 
@@ -26,12 +32,13 @@ function montaFixtures() {
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prelo-equiv-'));
   const viaTokens = path.join(raiz, 'via-tokens');
   const viaLegada = path.join(raiz, 'via-legada');
-  fs.mkdirSync(viaTokens);
-  fs.mkdirSync(viaLegada);
+  for (const dir of [viaTokens, viaLegada]) {
+    fs.mkdirSync(path.join(dir, 'fonts'), { recursive: true });
+    fs.copyFileSync(FONTE_LOCAL, path.join(dir, 'fonts', 'inter-400.woff2'));
+    fs.writeFileSync(path.join(dir, 'config.json'), CONFIG);
+  }
   fs.writeFileSync(path.join(viaTokens, 'tokens.css'), TOKENS);
-  fs.writeFileSync(path.join(viaTokens, 'config.json'), CONFIG);
   fs.writeFileSync(path.join(viaLegada, 'style.css'), `${BASE}\n${TOKENS}`);
-  fs.writeFileSync(path.join(viaLegada, 'config.json'), CONFIG);
   return raiz;
 }
 
