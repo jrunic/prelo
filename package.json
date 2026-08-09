@@ -1,16 +1,31 @@
 {
   "name": "prelo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Converte Markdown em PDF com identidade visual de marca",
   "type": "commonjs",
   "main": "index.js",
-  "files": ["index.js", "cli.js", "templates/", "brands/exemplo/", "scripts/", "CONTEXTO.md"],
-  "bin": { "prelo": "./cli.js" },
+  "files": [
+    "index.js",
+    "cli.js",
+    "templates/",
+    "brands/exemplo/",
+    "scripts/",
+    "CONTEXTO.md"
+  ],
+  "bin": {
+    "prelo": "./cli.js"
+  },
   "scripts": {
     "fonts": "node scripts/download-fonts.js --url \"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap\" --dest brands/exemplo/fonts",
     "test": "node --test"
   },
-  "keywords": ["markdown", "pdf", "puppeteer", "cli", "brand"],
+  "keywords": [
+    "markdown",
+    "pdf",
+    "puppeteer",
+    "cli",
+    "brand"
+  ],
   "author": "jrunic",
   "license": "MIT",
   "repository": {

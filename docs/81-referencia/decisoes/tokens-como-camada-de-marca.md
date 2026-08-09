@@ -74,9 +74,6 @@ Efeito colateral sobre quem gera marca automaticamente: o gerador precisava emit
 
 ## Referências
 
-- Spec: `docs/11-tarefas/20260809-tokens-css-camada-de-marca.md`
-- Plano: `docs/11-tarefas/20260809-tokens-css-camada-de-marca-plano.md`
 - Vocabulário: `docs/81-referencia/referencias/tokens.md`
 - Guia: `docs/81-referencia/guias/adicionar-brand.md`
-- ADR jedi-labs `20260716-payload-de-marca-autocontido-para-impressao` — emendada no item 2
-- Tarefa 411 no jd-tasks
+- Spec e plano de execução: documentos internos do autor, fora deste repositório.
