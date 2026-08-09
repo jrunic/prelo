@@ -46,6 +46,27 @@ function resolveBrandDir(brand) {
   );
 }
 
+function resolveBrandCss(brandDir) {
+  const tokensFile = path.join(brandDir, 'tokens.css');
+  const styleFile  = path.join(brandDir, 'style.css');
+
+  if (fs.existsSync(tokensFile)) {
+    const camadas = [
+      fs.readFileSync(path.resolve(__dirname, 'templates', 'base.css'), 'utf8'),
+      fs.readFileSync(tokensFile, 'utf8'),
+    ];
+    const extraFile = path.join(brandDir, 'extra.css');
+    if (fs.existsSync(extraFile)) camadas.push(fs.readFileSync(extraFile, 'utf8'));
+    return camadas.map((c) => c.trimEnd()).join('\n');
+  }
+
+  if (fs.existsSync(styleFile)) return fs.readFileSync(styleFile, 'utf8');
+
+  throw new Error(
+    `Marca sem folha de estilo em ${brandDir}: esperado tokens.css (recomendado) ou style.css (legado)`
+  );
+}
+
 function stripFrontmatter(markdown) {
   if (!markdown.startsWith('---')) return markdown;
   const end = markdown.indexOf('\n---', 3);
@@ -58,7 +79,7 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
   const brandDir = resolveBrandDir(brand);
 
   const config = JSON.parse(fs.readFileSync(path.join(brandDir, 'config.json'), 'utf8'));
-  const css    = fs.readFileSync(path.join(brandDir, 'style.css'), 'utf8');
+  const css    = resolveBrandCss(brandDir);
   const template = fs.readFileSync(path.resolve(__dirname, 'templates', 'base.html'), 'utf8');
 
   const content  = `<div class="content">${marked.parse(markdown)}</div>`;
@@ -104,4 +125,4 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
   }
 }
 
-module.exports = { mdToPdf, buildLocalFontTag };
+module.exports = { mdToPdf, buildLocalFontTag, resolveBrandCss };
