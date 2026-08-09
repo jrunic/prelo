@@ -40,7 +40,8 @@ Flags (conversão):
 
 Flags (instalar):
   --brand              Identificador da marca a instalar
-  --origem             Pasta contendo style.css e config.json da marca
+  --origem             Pasta da marca: config.json + tokens.css (ou style.css legado);
+                       extra.css e fonts/ copiados quando presentes
 
 Exemplos:
   prelo --brand exemplo --input relatorio.md --output relatorio.pdf
@@ -50,15 +51,26 @@ Exemplos:
 }
 
 function copiaPayloadMarca(origem, destino) {
-  const styleFile  = path.join(origem, 'style.css');
   const configFile = path.join(origem, 'config.json');
-  if (!fs.existsSync(styleFile) || !fs.existsSync(configFile)) {
-    throw new Error('pasta de origem deve conter style.css e config.json');
+  if (!fs.existsSync(configFile)) {
+    throw new Error('pasta de origem deve conter config.json');
   }
+
+  const folha = ['tokens.css', 'style.css'].find((f) => fs.existsSync(path.join(origem, f)));
+  if (!folha) {
+    throw new Error('pasta de origem deve conter tokens.css (recomendado) ou style.css (legado)');
+  }
+
   fs.mkdirSync(destino, { recursive: true });
-  fs.copyFileSync(styleFile,  path.join(destino, 'style.css'));
+  fs.copyFileSync(path.join(origem, folha), path.join(destino, folha));
   fs.copyFileSync(configFile, path.join(destino, 'config.json'));
-  const copiados = ['style.css', 'config.json'];
+  const copiados = [folha, 'config.json'];
+
+  const extraFile = path.join(origem, 'extra.css');
+  if (folha === 'tokens.css' && fs.existsSync(extraFile)) {
+    fs.copyFileSync(extraFile, path.join(destino, 'extra.css'));
+    copiados.push('extra.css');
+  }
 
   const fontsOrigem = path.join(origem, 'fonts');
   if (fs.existsSync(fontsOrigem) && fs.statSync(fontsOrigem).isDirectory()) {
