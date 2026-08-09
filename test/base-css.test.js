@@ -39,6 +39,15 @@ test('nenhuma família de fonte literal fora do :root', () => {
   assert.deepStrictEqual(literais, [], `famílias cravadas: ${literais.join(', ')}`);
 });
 
+test('nenhum peso de fonte literal fora do :root', () => {
+  // Peso cravado na estrutura é valor de marca no lugar errado: obriga toda
+  // marca a embarcar aquela face, mesmo sem tê-la declarado.
+  const literais = [...ESTRUTURA.matchAll(/font-weight:\s*([^;}]+)/g)]
+    .map((m) => m[1].trim())
+    .filter((v) => !v.startsWith('var('));
+  assert.deepStrictEqual(literais, [], `pesos cravados na estrutura: ${literais.join(', ')}`);
+});
+
 test('cores de estado degradam para a cor de texto', () => {
   assert.match(ROOT, /--cor-alerta:\s*var\(--cor-texto\)/);
   assert.match(ROOT, /--cor-ok:\s*var\(--cor-texto\)/);
