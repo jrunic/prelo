@@ -1,0 +1,28 @@
+/* Exemplo — marca de demonstração do prelo.
+   A marca é só este bloco. A estrutura vem de templates/base.css.
+   Vocabulário e defaults: docs/81-referencia/referencias/tokens.md
+
+   Pesos fixados em 400/500/700 — os que a marca embarca em fonts/.
+   O default de --peso-titulo do prelo é 600, que o exemplo não traz. */
+
+:root {
+  --fonte-corpo: 'Inter', sans-serif;
+  --fonte-titulo: 'Inter', sans-serif;
+
+  --peso-corpo: 400;
+  --peso-titulo: 700;
+  --peso-titulo-forte: 700;
+  --peso-label: 500;
+
+  --cor-texto: #1a1a1a;
+  --cor-texto-suave: #555555;
+  --cor-muted: #777777;
+
+  --cor-titulo-forte: #111111;
+  --cor-titulo-medio: #333333;
+  --cor-link: #0066cc;
+
+  --cor-borda: #dddddd;
+  --cor-fundo-suave: #f5f5f5;
+  --cor-fundo-zebra: #fafafa;
+}
