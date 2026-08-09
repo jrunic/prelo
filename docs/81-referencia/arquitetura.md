@@ -23,7 +23,9 @@ Mapa de navegação. Aponta para onde cada coisa vive; o conteúdo está nos des
   - [adicionar-brand.md](guias/adicionar-brand.md) — criar e instalar uma marca.
 - **Referências** — `referencias/`
   - [cli.md](referencias/cli.md) — comandos, flags, resolução de marca, códigos de saída.
-- **Decisões** — `decisoes/` — ADRs locais do produto (quando houver).
+  - [tokens.md](referencias/tokens.md) — vocabulário de tokens da marca, o que cada um pinta, defaults.
+- **Decisões** — `decisoes/`
+  - [tokens-como-camada-de-marca.md](decisoes/tokens-como-camada-de-marca.md) — estrutura pertence à ferramenta; marca é bloco de tokens.
 
 ## Código
 
@@ -31,4 +33,5 @@ Mapa de navegação. Aponta para onde cada coisa vive; o conteúdo está nos des
 - `cli.js` — wrapper de linha de comando; comandos `conversão` e `instalar`.
 - `scripts/download-fonts.js` — baixa as fontes locais.
 - `templates/base.html` — template HTML com slots de fonte, estilo e conteúdo.
-- `brands/exemplo/` — marca de demonstração.
+- `templates/base.css` — estrutura visual da ferramenta; consome `var(--*)`, sem valor de marca cravado.
+- `brands/exemplo/` — marca de demonstração (`tokens.css` + `config.json` + `fonts/`).

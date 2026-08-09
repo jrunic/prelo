@@ -54,10 +54,12 @@ prelo/
 ├── fonts/                         # .woff2 locais (gerado por npm run fonts)
 ├── brands/
 │   └── exemplo/                   # brand de demonstração
-│       ├── style.css
-│       └── config.json
+│       ├── tokens.css             # a marca: só o bloco :root
+│       ├── config.json
+│       └── fonts/
 └── templates/
-    └── base.html                  # template HTML com {{FONT_TAG}}, {{STYLE}}, {{CONTENT}}
+    ├── base.html                  # template HTML com {{FONT_TAG}}, {{STYLE}}, {{CONTENT}}
+    └── base.css                   # estrutura visual; consome var(--*), sem valor cravado
 ```
 
 ## Path de brands (XDG)
@@ -67,6 +69,24 @@ Ordem de busca:
 1. `$PRELO_BRANDS_DIR/<brand>/` — override explícito (dev/CI)
 2. `$XDG_DATA_HOME/prelo/brands/<brand>/` — instalação do usuário (`~/.local/share/prelo/brands/`)
 3. `<repo>/brands/<brand>/` — fallback para brand de exemplo
+
+## Camadas de CSS
+
+A estrutura visual é da **ferramenta**, não da marca. `resolveBrandCss(brandDir)` (em `index.js`) resolve o CSS em duas vias:
+
+**Via de tokens** (recomendada) — concatena, nesta ordem:
+
+1. `templates/base.css` — estrutura; abre com um `:root` de defaults e consome `var(--*)` em todo o resto.
+2. `<marca>/tokens.css` — a marca inteira, ~25 declarações. Sobrescreve os defaults.
+3. `<marca>/extra.css` — opcional; o seletor que só aquela marca tem. Última palavra.
+
+**Via legada** — marca com `style.css` usa a folha inteira, sem `base.css`. Compromisso permanente: retrocompatibilidade e escape hatch para marca que precise de estrutura própria. Se a marca tem `tokens.css` e `style.css`, **tokens vence**.
+
+Regras que o `test/base-css.test.js` enforça no `base.css`: todo `var(--*)` usado tem default no `:root`; nenhuma cor, família ou peso literal fora do `:root`; comentários balanceados.
+
+Vocabulário dos tokens: `docs/81-referencia/referencias/tokens.md`. Raciocínio: `docs/81-referencia/decisoes/tokens-como-camada-de-marca.md`.
+
+**Peso demandado ⊆ peso embarcado.** O peso fixado nos `--peso-*` tem de existir em `config.fonts`, senão o Chromium sintetiza a face. `test/cobertura-pesos.test.js` guarda isso usando o valor *efetivo* de cada token (o default do `base.css` é sombreado pelo `tokens.css` da marca).
 
 ## Stack
 
@@ -83,7 +103,7 @@ Fonte é dado da marca, não do código. Cada marca declara suas fontes em `conf
 "fonts": [ { "family": "Inter", "weight": 400, "file": "inter-400.woff2" } ]
 ```
 
-Os `.woff2` vivem em `<marca>/fonts/`. No render, `buildLocalFontTag(brandDir, config)` monta `@font-face` a partir deles — degrada por face se um arquivo faltar; cai no CDN se nenhuma resolver. `prelo instalar` copia a subpasta `fonts/` junto com `style.css`+`config.json`.
+Os `.woff2` vivem em `<marca>/fonts/`. No render, `buildLocalFontTag(brandDir, config)` monta `@font-face` a partir deles — degrada por face se um arquivo faltar; cai no CDN se nenhuma resolver. `prelo instalar` copia a subpasta `fonts/` junto com a folha (`tokens.css` ou `style.css`) e o `config.json`.
 
 Gerar as fontes de uma marca (ferramenta geral):
 
@@ -95,6 +115,10 @@ node scripts/download-fonts.js --url "<googleFontsUrl>" --dest <marca>/fonts
 
 ## Adicionar nova marca
 
-1. Criar `~/.local/share/prelo/brands/<nome-kebab>/style.css`
-2. Criar `~/.local/share/prelo/brands/<nome-kebab>/config.json` (mesmo schema de `brands/exemplo/config.json`)
-3. Invocar: `prelo --brand <nome-kebab> --input ...`
+Escrever `tokens.css` + `config.json` numa pasta qualquer e instalar:
+
+```bash
+prelo instalar --brand <nome-kebab> --origem <pasta>
+```
+
+`tokens.css`, `config.json`, `extra.css` e `fonts/` são copiados para o XDG. Passo a passo: `docs/81-referencia/guias/adicionar-brand.md`.
