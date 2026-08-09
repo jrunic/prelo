@@ -1,0 +1,156 @@
+/* base.css — estrutura visual do prelo. Propriedade da ferramenta, versionada com ela.
+   Nenhum valor de marca é cravado aqui: tudo consome var(--*).
+   O :root abaixo são DEFAULTS — a marca sobrescreve o que quiser em seu tokens.css.
+   Vocabulário completo: docs/81-referencia/referencias/tokens.md */
+
+:root {
+  /* Tipografia — famílias */
+  --fonte-corpo: 'Inter', sans-serif;
+  --fonte-titulo: 'Inter', sans-serif;
+  --fonte-mono: 'Courier New', Courier, monospace;
+
+  /* Tipografia — tamanhos de impressão (downscale da escala de tela) */
+  --tam-corpo: 14px;
+  --tam-h1: 24px;
+  --tam-h2: 18px;
+  --tam-h3: 15px;
+  --tam-h4: 13px;
+  --tam-mono: 12px;
+
+  /* Tipografia — pesos. A marca decide; estes são defaults legíveis de impressão.
+     Marca editorial de peso leve sobrescreve. O peso fixado tem de existir em config.fonts. */
+  --peso-corpo: 400;
+  --peso-titulo: 600;
+  --peso-titulo-forte: 700;
+  --peso-label: 500;
+
+  /* Cores — texto */
+  --cor-texto: #1a1a1a;
+  --cor-texto-suave: #555555;
+  --cor-muted: #777777;
+
+  /* Cores — títulos e âncoras */
+  --cor-titulo-forte: #111111;
+  --cor-titulo-medio: #333333;
+  --cor-link: #0066cc;
+
+  /* Cores — superfícies e bordas */
+  --cor-borda: #dddddd;
+  --cor-fundo-suave: #f5f5f5;
+  --cor-fundo-zebra: #fafafa;
+
+  /* Cores — estado (utilitárias). Default aponta para a cor de texto:
+     marca que não declara estado renderiza .alert/.ok como texto normal.
+     Para suprimir as regras por completo, usar extra.css. */
+  --cor-alerta: var(--cor-texto);
+  --cor-ok: var(--cor-texto);
+}
+
+/* --- Página --- */
+@page { size: A4; margin: 20mm 18mm 24mm 18mm; }
+
+/* --- Base --- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--fonte-corpo);
+  font-size: var(--tam-corpo);
+  font-weight: var(--peso-corpo);
+  line-height: 1.6;
+  color: var(--cor-texto);
+  margin: 0;
+  padding: 0;
+}
+
+.content { width: 100%; }
+
+/* --- Headings --- */
+h1, h2, h3, h4 { font-family: var(--fonte-titulo); page-break-after: avoid; }
+
+h1 {
+  font-size: var(--tam-h1);
+  font-weight: var(--peso-titulo-forte);
+  color: var(--cor-titulo-forte);
+  border-bottom: 2px solid var(--cor-titulo-forte);
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+h2 { font-size: var(--tam-h2); font-weight: var(--peso-titulo); color: var(--cor-titulo-forte); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: var(--tam-h3); font-weight: var(--peso-titulo); color: var(--cor-titulo-medio); margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: var(--tam-h4); font-weight: var(--peso-titulo); color: var(--cor-texto-suave); margin-top: 16px; margin-bottom: 6px; }
+
+/* --- Parágrafos e texto --- */
+p { margin: 0 0 12px 0; color: var(--cor-texto); }
+a { color: var(--cor-link); text-decoration: none; }
+strong { font-weight: var(--peso-titulo-forte); }
+em { font-style: italic; }
+
+/* --- Listas --- */
+ul, ol { margin: 0 0 12px 0; padding-left: 24px; }
+li { margin-bottom: 4px; }
+li > ul, li > ol { margin-bottom: 0; }
+
+/* --- Checkbox lists (GFM task lists) --- */
+li.task-list-item { list-style: none; margin-left: -20px; }
+input[type="checkbox"] { margin-right: 8px; }
+
+/* --- Tabelas --- */
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; page-break-inside: avoid; }
+th {
+  background: var(--cor-fundo-suave);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-weight: var(--peso-label);
+  font-size: 13px;
+  padding: 8px 12px;
+  border: 1px solid var(--cor-borda);
+  text-align: left;
+}
+td { padding: 7px 12px; border: 1px solid var(--cor-borda); vertical-align: top; color: var(--cor-texto); }
+tr { page-break-inside: avoid; }
+tr:nth-child(even) td { background: var(--cor-fundo-zebra); }
+tr:last-child td { border-bottom: none; }
+
+/* --- Separadores --- */
+hr { border: none; border-top: 1px solid var(--cor-borda); margin: 24px 0; }
+
+/* --- Código inline --- */
+code {
+  font-family: var(--fonte-mono);
+  font-size: var(--tam-mono);
+  background: var(--cor-fundo-suave);
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: var(--cor-texto);
+}
+
+/* --- Blocos de código --- */
+pre {
+  background: var(--cor-fundo-suave);
+  padding: 12px 16px;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: var(--tam-mono);
+  margin: 12px 0;
+  page-break-inside: avoid;
+}
+pre code { background: none; padding: 0; }
+
+/* --- Blockquote --- */
+blockquote {
+  border-left: 3px solid var(--cor-titulo-forte);
+  margin: 16px 0;
+  padding: 8px 16px;
+  background: var(--cor-fundo-suave);
+  color: var(--cor-texto-suave);
+}
+blockquote p { margin: 0; color: var(--cor-texto-suave); }
+
+/* --- Imagens --- */
+img { max-width: 100%; page-break-inside: avoid; }
+
+/* --- Classes utilitárias --- */
+.alert { color: var(--cor-alerta); font-weight: 500; }
+.ok { color: var(--cor-ok); font-weight: 500; }
+.muted { color: var(--cor-muted); font-size: 12px; }
