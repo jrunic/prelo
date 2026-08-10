@@ -135,15 +135,25 @@ function stripFrontmatter(markdown) {
   return markdown.slice(end + 4).replace(/^\n/, '');
 }
 
-async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip = false }) {
+async function mdToPdf({
+  markdown, brand, outputPath,
+  stripFrontmatter: doStrip = false,
+  baseDir = process.cwd(),
+  baseUrl,
+  onAviso,
+}) {
+  baseDir = path.resolve(baseDir);   // paraFileUrl exige base absoluta
   if (doStrip) markdown = stripFrontmatter(markdown);
   const brandDir = resolveBrandDir(brand);
 
   const config = JSON.parse(fs.readFileSync(path.join(brandDir, 'config.json'), 'utf8'));
-  const css    = resolveBrandCss(brandDir);
+  const css    = reescreveUrlsDoCss(resolveBrandCss(brandDir), brandDir);
   const template = fs.readFileSync(path.resolve(__dirname, 'templates', 'base.html'), 'utf8');
 
-  const content  = `<div class="content">${marked.parse(markdown)}</div>`;
+  const { html: conteudoResolvido, imagensAusentes } =
+    reescreveReferenciasDoDocumento(marked.parse(markdown), baseDir, { baseUrl });
+  if (onAviso) for (const a of imagensAusentes) onAviso(a);
+  const content  = `<div class="content">${conteudoResolvido}</div>`;
   const localFontTag = buildLocalFontTag(brandDir, config);
   const fontTag = localFontTag
     ? localFontTag

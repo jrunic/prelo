@@ -159,3 +159,63 @@ test('CSS sem url() sai idêntico', () => {
   const entrada = ':root{--cor-texto:#111}\nbody{color:var(--cor-texto)}';
   assert.strictEqual(reescreveUrlsDoCss(entrada, '/tmp/marca'), entrada);
 });
+
+const { mdToPdf } = require('../index.js');
+
+function marcaFixture() {
+  const fs = require('fs'), os = require('os'), path = require('path');
+  const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prelo-fx-'));
+  const marca = path.join(raiz, 'fx');
+  fs.mkdirSync(path.join(marca, 'fonts'), { recursive: true });
+  fs.copyFileSync(
+    path.resolve(__dirname, '..', 'brands', 'exemplo', 'fonts', 'inter-400.woff2'),
+    path.join(marca, 'fonts', 'inter-400.woff2'));
+  fs.writeFileSync(path.join(marca, 'tokens.css'), ':root{--cor-texto:#111}');
+  fs.writeFileSync(path.join(marca, 'config.json'), JSON.stringify({
+    name: 'Fx',
+    fonts: [{ family: 'Inter', weight: 400, file: 'inter-400.woff2' }],
+    page: { format: 'A4', margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } },
+  }));
+  return raiz;
+}
+
+async function comMarcas(raiz, fn) {
+  const anterior = process.env.PRELO_BRANDS_DIR;
+  process.env.PRELO_BRANDS_DIR = raiz;
+  try { return await fn(); } finally {
+    if (anterior === undefined) delete process.env.PRELO_BRANDS_DIR;
+    else process.env.PRELO_BRANDS_DIR = anterior;
+  }
+}
+
+test('mdToPdf sem baseDir usa o cwd e não quebra', async () => {
+  const raiz = marcaFixture();
+  const pdf = await comMarcas(raiz, () => mdToPdf({ markdown: '# Só texto\n', brand: 'fx' }));
+  assert.ok(Buffer.isBuffer(pdf) && pdf.length > 0);
+});
+
+test('mdToPdf entrega imagens ausentes ao chamador por onAviso', async () => {
+  const raiz = marcaFixture();
+  const avisos = [];
+  await comMarcas(raiz, () => mdToPdf({
+    markdown: '![f](fotos/sumiu.png)\n',
+    brand: 'fx',
+    baseDir: raiz,
+    onAviso: (a) => avisos.push(a),
+  }));
+  assert.strictEqual(avisos.length, 1);
+  assert.strictEqual(avisos[0].original, 'fotos/sumiu.png');
+  assert.ok(avisos[0].resolvido.endsWith('/fotos/sumiu.png'));
+});
+
+test('mdToPdf normaliza baseDir relativo para absoluto', async () => {
+  const raiz = marcaFixture();
+  const avisos = [];
+  await comMarcas(raiz, () => mdToPdf({
+    markdown: '![f](sumiu.png)\n',
+    brand: 'fx',
+    baseDir: '.',
+    onAviso: (a) => avisos.push(a),
+  }));
+  assert.ok(avisos[0].resolvido.startsWith('/'), avisos[0].resolvido);
+});
