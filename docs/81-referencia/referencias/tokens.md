@@ -78,7 +78,7 @@ Peso carrega identidade: uma marca editorial ultraleve (Inter 200/300) deve sobr
 |---|---|---|
 | `--cor-titulo-forte` | `h1`, `h2`, borda inferior do `h1`, barra do `blockquote` | `#111111` |
 | `--cor-titulo-medio` | `h3` | `#333333` |
-| `--cor-link` | `a` | `#0066cc` |
+| `--cor-link` | `a[href]` — só âncora com destino; link relativo desativado fica com a cor do texto | `#0066cc` |
 
 ## Cores — superfícies e bordas
 
