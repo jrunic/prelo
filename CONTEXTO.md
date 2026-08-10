@@ -102,6 +102,12 @@ Vocabulário dos tokens: `docs/81-referencia/referencias/tokens.md`. Raciocínio
 
 **Peso demandado ⊆ peso embarcado.** O peso fixado nos `--peso-*` tem de existir em `config.fonts`, senão o Chromium sintetiza a face. `test/cobertura-pesos.test.js` guarda isso usando o valor *efetivo* de cada token (o default do `base.css` é sombreado pelo `tokens.css` da marca).
 
+## Testes
+
+`npm test` roda `node --test --test-concurrency=1`. A serialização é **necessária, não preferência**: três arquivos de teste sobem Puppeteer, e em paralelo a contenção de recursos degrada renders de forma intermitente — PDFs truncados, objeto de imagem ausente. Observado antes da serialização; 6 execuções seguidas verdes depois. Custo: ~9s → ~16s.
+
+Ao inspecionar PDF em teste, **contagem não é discriminador**: o ícone de imagem quebrada é ele próprio um objeto de imagem embutido, então "existe objeto de imagem" não prova que a foto resolveu. `test/helpers/pdf.js` expõe `largurasDeImagem` justamente para separar os dois (fixture 1x1 → `/Width 1`; ícone de quebrado → `/Width 14`).
+
 ## Stack
 
 - **Runtime:** Node.js 22 LTS
