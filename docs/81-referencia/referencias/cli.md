@@ -27,6 +27,7 @@ tags: [referencia, cli, flags]
 | `--brand` | sim | identificador da marca | Nome do diretório da marca a aplicar (ex: `exemplo`). |
 | `--input` | sim | caminho | Arquivo Markdown de entrada. Resolvido contra o diretório atual. |
 | `--output` | não | caminho | Arquivo PDF de saída. Se omitido, o PDF é escrito no stdout. |
+| `--base-url` | não | — | URL pública de base para links relativos (ex: `https://site.com/docs/`). Sem ela, link relativo perde o destino e vira texto. Não afeta imagens. |
 | `--strip-frontmatter` | não | — | Remove o bloco YAML front-matter do início do Markdown antes de converter. |
 | `--help`, `-h` | não | — | Exibe a ajuda e encerra. |
 
@@ -78,6 +79,28 @@ Os arquivos `.woff2` correspondentes vivem em `<marca>/fonts/`. No render, o pre
 - **Entrada:** Markdown com GitHub Flavored Markdown (GFM) — tabelas, listas de tarefas, blocos de código. Front-matter YAML opcional, removível com `--strip-frontmatter`.
 - **Saída:** PDF.
 
-## Imagens locais
+## Referências relativas
 
-Imagens referenciadas por caminho relativo não resolvem, porque o HTML intermediário é renderizado a partir de um diretório temporário. Referencie imagens locais por caminho absoluto no Markdown enviado ao prelo.
+Cada referência relativa resolve contra sua própria origem.
+
+| Referência | Resolve contra |
+|---|---|
+| `![](fotos/x.png)` | pasta do arquivo passado em `--input` |
+| `url()` no CSS da marca | pasta da marca instalada |
+| `[x](anexo.pdf)` | com `--base-url`, a URL declarada; sem ela, o destino é removido e fica o texto |
+
+Ficam intocados: qualquer esquema (`http(s):`, `data:`, `file:`, `mailto:`, `tel:`), caminho absoluto, protocolo-relativo (`//cdn/...`) e fragmento (`#secao`).
+
+Link relativo não vira caminho local porque um link é resolvido em tempo de clique, na máquina de quem lê o PDF: apontá-lo para o disco de quem gerou produz link morto e expõe a árvore daquele sistema de arquivos. Imagem é o oposto — resolvida durante o render e embutida no PDF, o caminho não sobrevive no arquivo final.
+
+Com `--base-url`, a resolução segue a regra padrão de URL do navegador: base terminada em `/` trata o último segmento como diretório; sem a barra, o substitui.
+
+## Imagem local ausente
+
+Imagem cujo arquivo não existe em disco gera uma linha no stderr:
+
+```
+Aviso: imagem não encontrada: fotos/x.png (resolvido para /caminho/completo/fotos/x.png)
+```
+
+O código de saída continua `0` — um PDF com uma foto faltando ainda serve. O aviso existe porque a falha é invisível de outra forma: o ícone de imagem quebrada é ele próprio um objeto de imagem embutido, então o **tamanho do PDF não denuncia** e pode até ser maior que o do PDF correto.

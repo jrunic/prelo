@@ -72,6 +72,8 @@ Uma marca é um `tokens.css` — um bloco de valores — mais um `config.json` c
 
 5. (Opcional) `~/minhas-marcas/acme/extra.css` para a regra que só essa marca tem — um seletor próprio, uma quebra de página específica. Aplicado depois dos tokens, tem a última palavra.
 
+   A marca pode trazer imagens próprias (uma logo, uma marca d'água) na sua pasta e referenciá-las por caminho relativo: `url(logo.png)` resolve contra a pasta da marca, não contra o documento. As três formas valem — `url(x.png)`, `url('x.png')`, `url("x.png")`.
+
 6. Instale:
 
    ```bash

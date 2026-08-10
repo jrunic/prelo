@@ -22,24 +22,38 @@ prelo --brand exemplo --input relatorio.md --output relatorio.pdf
 prelo --brand exemplo --input relatorio.md > relatorio.pdf
 ```
 
-## Imagens locais exigem caminho absoluto
+## Resolução de referência relativa
 
-O `index.js` escreve o HTML intermediário em `os.tmpdir()` e o Puppeteer carrega via `file://<tmpdir>/...`. Caminhos de imagem **relativos** (ex: `![](fotos/x.jpg)`) resolvem contra o tmpdir — onde a imagem não existe — e renderizam quebradas (PDF sai pequeno, só com placeholders).
+Cada referência relativa resolve contra **sua própria origem**:
 
-- **Regra:** referenciar imagens locais por **caminho absoluto** no Markdown enviado ao `prelo`.
-- **Padrão recomendado:** manter o `.md` canônico com paths relativos (portável) e gerar uma cópia de render com paths absolutos só para o PDF:
-  ```bash
-  sed "s#](fotos/#](${PWD}/fotos/#g" peca.md > /tmp/peca-render.md
-  prelo --brand exemplo --input /tmp/peca-render.md --output peca.pdf --strip-frontmatter
-  ```
-- **Sintoma de path errado:** PDF de dezenas de KB (sem imagens) em vez de MBs.
+| Referência | Resolve contra | Observação |
+|---|---|---|
+| `![](fotos/x.png)` no Markdown | pasta do arquivo de entrada (`baseDir`) | vira `file://` absoluto e é embutida no PDF |
+| `url()` no CSS da marca | pasta da marca instalada | devolve a semântica de folha de estilo que o inline do CSS perde |
+| `[x](anexo.pdf)` no Markdown | nada | sem `--base-url` perde o destino e vira texto |
+
+`baseDir` vem do `path.dirname` do arquivo de entrada no CLI; na biblioteca é parâmetro, com `process.cwd()` de default, normalizado para absoluto na entrada.
+
+**Link relativo não vira caminho local de propósito.** Link é gravado no PDF como URI e resolvido em tempo de clique, na máquina de quem lê — apontá-lo para o disco de quem gerou produz link morto e expõe a árvore daquele sistema de arquivos. Imagem é o oposto: resolvida em render e embutida, o caminho não sobrevive no arquivo final. Quem publica o `.md` num site declara `--base-url` e os links viram URLs públicas (resolução WHATWG padrão).
+
+Preservados sem toque em qualquer caso: qualquer esquema (`http(s):`, `data:`, `file:`, `mailto:`, `tel:`), caminho absoluto, protocolo-relativo e fragmento.
+
+**Imagem ausente em disco emite aviso no stderr e o código de saída continua 0.** A biblioteca não imprime — devolve o achado por `onAviso` e o chamador decide.
+
+**Tamanho de PDF não denuncia imagem quebrada.** O ícone de quebrado é ele próprio um objeto de imagem embutido, às vezes maior que a foto real (medido: quebrado 23,4 KB vs correto 18,4 KB). O que distingue é a largura do objeto de imagem — ver `test/helpers/pdf.js`.
 
 ## Interface Node.js
 
 ```js
 const { mdToPdf } = require('./index.js')
-const pdf = await mdToPdf({ markdown, brand: 'exemplo', outputPath: '/tmp/out.pdf' })
-// outputPath omitido → retorna Buffer
+const pdf = await mdToPdf({
+  markdown,
+  brand: 'exemplo',
+  outputPath: '/tmp/out.pdf',   // omitido → retorna Buffer
+  baseDir: '/caminho/do/documento',        // default: process.cwd()
+  baseUrl: 'https://site.com/docs/',       // opcional; só afeta links
+  onAviso: ({ original, resolvido }) => {}, // imagem local ausente
+})
 ```
 
 ## Estrutura

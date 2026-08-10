@@ -110,6 +110,7 @@ Fora do vocabulário CSS, definido em `config.json`:
 - **Margem de página, formato e orientação** — `page.format` e `page.margin`. É o Puppeteer que aplica; a regra `@page` do CSS é inerte no modo de render atual. Não existe token de margem.
 - **Rodapé e cabeçalho** — `footer.template` e `header.template`, HTML inline com estilo próprio. Não herdam os tokens: cor e fonte vão escritas no template.
 - **Fontes** — `config.fonts` e os `.woff2` em `<marca>/fonts/`.
+- **Imagens da marca** — declaradas por `url()` no CSS da marca. Caminho relativo resolve contra a **pasta da marca**, não contra o documento; imagem do Markdown é que resolve contra a pasta do `.md`.
 
 ## Marca mínima
 
