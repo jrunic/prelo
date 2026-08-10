@@ -82,7 +82,7 @@ h4 { font-size: var(--tam-h4); font-weight: var(--peso-titulo); color: var(--cor
 
 /* --- Parágrafos e texto --- */
 p { margin: 0 0 12px 0; color: var(--cor-texto); }
-a { color: var(--cor-link); text-decoration: none; }
+a[href] { color: var(--cor-link); text-decoration: none; }
 strong { font-weight: var(--peso-titulo-forte); }
 em { font-style: italic; }
 

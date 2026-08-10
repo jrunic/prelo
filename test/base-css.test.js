@@ -48,6 +48,13 @@ test('nenhum peso de fonte literal fora do :root', () => {
   assert.deepStrictEqual(literais, [], `pesos cravados na estrutura: ${literais.join(', ')}`);
 });
 
+test('cor de link aplica só a âncora com href', () => {
+  // Link relativo sem base pública perde o href e vira texto. Se a regra de cor
+  // não exigir [href], o texto continua azul e engana o leitor.
+  assert.match(ESTRUTURA, /a\[href\]\s*\{[^}]*color:\s*var\(--cor-link\)/);
+  assert.doesNotMatch(ESTRUTURA, /^a\s*\{[^}]*color:\s*var\(--cor-link\)/m);
+});
+
 test('cores de estado degradam para a cor de texto', () => {
   assert.match(ROOT, /--cor-alerta:\s*var\(--cor-texto\)/);
   assert.match(ROOT, /--cor-ok:\s*var\(--cor-texto\)/);
