@@ -57,9 +57,13 @@ O prelo procura a marca nesta ordem, parando na primeira que existir:
 - [Vocabulário de tokens](docs/81-referencia/referencias/tokens.md)
 - [Referência da CLI](docs/81-referencia/referencias/cli.md)
 
-## Imagens locais
+## Referências relativas
 
-Referencie imagens locais por caminho absoluto no Markdown. Caminhos relativos não resolvem, porque o HTML intermediário é renderizado a partir de um diretório temporário.
+`![](fotos/x.png)` resolve contra a pasta do arquivo passado em `--input` — o `.md` continua portável entre máquinas. `url()` no CSS de uma marca resolve contra a pasta da marca.
+
+Link relativo (`[x](anexo.pdf)`) é o caso diferente: um link é resolvido quando alguém clica, na máquina de quem lê o PDF, então apontá-lo para o disco de quem gerou produziria um link morto e exporia a árvore daquele sistema de arquivos. Sem `--base-url`, o destino é removido e fica o texto; com ela, vira URL pública.
+
+Imagem local que não existe em disco gera aviso no stderr, e o código de saída continua 0.
 
 ## Licença
 
