@@ -85,6 +85,37 @@ function paraFileUrl(baseDir, ref) {
   return new URL(path.resolve(baseDir, ref), 'file://').href;
 }
 
+// Opera sobre a saída do marked, ANTES da injeção no template — assim o <link>
+// de fontes do cabeçalho não entra no alcance.
+// Reescrita textual é segura porque o marked escapa as aspas de atributo dentro
+// de <code>/<pre>, então exemplo de código não casa.
+function reescreveReferenciasDoDocumento(html, baseDir, { baseUrl } = {}) {
+  const imagensAusentes = [];
+
+  let saida = html.replace(/(<img\b[^>]*?\bsrc=")([^"]*)(")/gi, (m, pre, ref, pos) => {
+    if (!ehReferenciaRelativa(ref)) return m;
+    const absoluto = path.resolve(baseDir, ref);
+    if (!fs.existsSync(absoluto)) imagensAusentes.push({ original: ref, resolvido: absoluto });
+    return pre + paraFileUrl(baseDir, ref) + pos;
+  });
+
+  // Casa a tag inteira e mexe SÓ no atributo href. Reconstruir a tag a partir
+  // das partes ao redor do href deixa espaço duplo quando há outro atributo, e
+  // normalizar espaços corromperia valores.
+  saida = saida.replace(/<a\b[^>]*>/gi, (tag) => {
+    const m = tag.match(/\bhref="([^"]*)"/i);
+    if (!m || !ehReferenciaRelativa(m[1])) return tag;
+    if (baseUrl) {
+      return tag.replace(/\bhref="[^"]*"/i, `href="${new URL(m[1], baseUrl).href}"`);
+    }
+    // Sem base pública, o destino só funcionaria na máquina de quem gerou —
+    // e ainda exporia o caminho dela no PDF. Some o href, fica o texto.
+    return tag.replace(/\s*\bhref="[^"]*"/i, '');
+  });
+
+  return { html: saida, imagensAusentes };
+}
+
 function stripFrontmatter(markdown) {
   if (!markdown.startsWith('---')) return markdown;
   const end = markdown.indexOf('\n---', 3);
@@ -145,5 +176,5 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
 
 module.exports = {
   mdToPdf, buildLocalFontTag, resolveBrandCss,
-  ehReferenciaRelativa, paraFileUrl,
+  ehReferenciaRelativa, paraFileUrl, reescreveReferenciasDoDocumento,
 };

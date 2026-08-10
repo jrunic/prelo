@@ -40,3 +40,89 @@ test('paraFileUrl normaliza ../', () => {
 test('paraFileUrl codifica espaço no nome', () => {
   assert.ok(paraFileUrl('/tmp/base', 'foto com espaco.png').includes('%20'));
 });
+
+const { reescreveReferenciasDoDocumento } = require('../index.js');
+
+const r = (html, opts = {}) => reescreveReferenciasDoDocumento(html, '/tmp/base', opts);
+
+test('imagem relativa vira file:// absoluto', () => {
+  const { html } = r('<img src="fotos/x.png" alt="a">');
+  assert.match(html, /src="file:\/\/\/tmp\/base\/fotos\/x\.png"/);
+});
+
+test('imagem remota, data:, file:// e absoluta ficam intocadas', () => {
+  const entrada = '<img src="https://a/b.png"><img src="data:image/png;base64,AA">' +
+                  '<img src="file:///x.png"><img src="/etc/x.png">';
+  assert.strictEqual(r(entrada).html, entrada);
+});
+
+test('img escrita como HTML cru também é resolvida', () => {
+  const { html } = r('<p>texto</p>\n<img src="logo.png">');
+  assert.match(html, /src="file:\/\/\/tmp\/base\/logo\.png"/);
+});
+
+test('link http, mailto, tel e fragmento ficam intocados', () => {
+  const entrada = '<a href="https://a/b">w</a><a href="mailto:a@b.com">m</a>' +
+                  '<a href="tel:+55">t</a><a href="#secao">f</a>';
+  assert.strictEqual(r(entrada).html, entrada);
+});
+
+test('link absoluto e file:// ficam intocados', () => {
+  const entrada = '<a href="/etc/hosts">a</a><a href="file:///etc/hosts">f</a>';
+  assert.strictEqual(r(entrada).html, entrada);
+});
+
+test('link relativo sem baseUrl perde o href e mantém o texto', () => {
+  const { html } = r('<a href="anexo.pdf">o anexo</a>');
+  assert.strictEqual(html, '<a>o anexo</a>');
+});
+
+test('remoção do href preserva os outros atributos, sem espaço residual', () => {
+  assert.strictEqual(r('<a href="x.pdf" title="t">y</a>').html, '<a title="t">y</a>');
+  assert.strictEqual(r('<a class="c" href="x.pdf">y</a>').html, '<a class="c">y</a>');
+  assert.strictEqual(
+    r('<a class="c" href="x.pdf" title="t &gt; u">y</a>').html,
+    '<a class="c" title="t &gt; u">y</a>');
+});
+
+test('link relativo com baseUrl vira URL pública', () => {
+  const { html } = r('<a href="anexo.pdf">x</a>', { baseUrl: 'https://site.com/docs/' });
+  assert.match(html, /href="https:\/\/site\.com\/docs\/anexo\.pdf"/);
+});
+
+test('substituição por baseUrl preserva os outros atributos', () => {
+  const { html } = r('<a class="c" href="x.pdf" title="t">y</a>', { baseUrl: 'https://s.com/d/' });
+  assert.strictEqual(html, '<a class="c" href="https://s.com/d/x.pdf" title="t">y</a>');
+});
+
+test('baseUrl sem barra final substitui o último segmento (regra WHATWG)', () => {
+  const { html } = r('<a href="anexo.pdf">x</a>', { baseUrl: 'https://site.com/docs' });
+  assert.match(html, /href="https:\/\/site\.com\/anexo\.pdf"/);
+});
+
+test('baseUrl não afeta imagem — imagem resolve sempre local', () => {
+  const { html } = r('<img src="fotos/x.png">', { baseUrl: 'https://site.com/docs/' });
+  assert.match(html, /src="file:\/\/\/tmp\/base\/fotos\/x\.png"/);
+});
+
+test('bloco de código com tag de imagem sai literal', () => {
+  const entrada = '<pre><code>&lt;img src=&quot;nao.png&quot;&gt;</code></pre>';
+  assert.strictEqual(r(entrada).html, entrada);
+});
+
+test('imagem ausente em disco é reportada, e ainda assim reescrita', () => {
+  const { html, imagensAusentes } = r('<img src="fotos/sumiu.png">');
+  assert.match(html, /src="file:\/\/\/tmp\/base\/fotos\/sumiu\.png"/);
+  assert.deepStrictEqual(imagensAusentes, [
+    { original: 'fotos/sumiu.png', resolvido: '/tmp/base/fotos/sumiu.png' },
+  ]);
+});
+
+test('imagem presente em disco não entra em imagensAusentes', () => {
+  const fs = require('fs'), os = require('os'), path = require('path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prelo-img-'));
+  fs.mkdirSync(path.join(dir, 'fotos'));
+  fs.writeFileSync(path.join(dir, 'fotos', 'existe.png'), 'x');
+  const res = reescreveReferenciasDoDocumento('<img src="fotos/existe.png">', dir);
+  assert.deepStrictEqual(res.imagensAusentes, []);
+});
