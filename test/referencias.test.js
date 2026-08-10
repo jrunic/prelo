@@ -126,3 +126,36 @@ test('imagem presente em disco não entra em imagensAusentes', () => {
   const res = reescreveReferenciasDoDocumento('<img src="fotos/existe.png">', dir);
   assert.deepStrictEqual(res.imagensAusentes, []);
 });
+
+const { reescreveUrlsDoCss } = require('../index.js');
+
+test('url() sem aspas resolve contra a pasta da marca', () => {
+  const css = reescreveUrlsDoCss('h1{background:url(logo.png)}', '/tmp/marca');
+  assert.match(css, /url\("file:\/\/\/tmp\/marca\/logo\.png"\)/);
+});
+
+test('url() com aspas simples resolve', () => {
+  const css = reescreveUrlsDoCss("h1{background:url('logo.png')}", '/tmp/marca');
+  assert.match(css, /url\("file:\/\/\/tmp\/marca\/logo\.png"\)/);
+});
+
+test('url() com aspas duplas resolve', () => {
+  const css = reescreveUrlsDoCss('h1{background:url("logo.png")}', '/tmp/marca');
+  assert.match(css, /url\("file:\/\/\/tmp\/marca\/logo\.png"\)/);
+});
+
+test('url() com espaço interno resolve', () => {
+  const css = reescreveUrlsDoCss('h1{background:url( logo.png )}', '/tmp/marca');
+  assert.match(css, /url\("file:\/\/\/tmp\/marca\/logo\.png"\)/);
+});
+
+test('url() remota, data: e absoluta ficam intocadas', () => {
+  const entrada = 'a{background:url(https://a/b.png)}b{background:url(data:image/png;base64,AA)}' +
+                  'c{background:url(/etc/x.png)}';
+  assert.strictEqual(reescreveUrlsDoCss(entrada, '/tmp/marca'), entrada);
+});
+
+test('CSS sem url() sai idêntico', () => {
+  const entrada = ':root{--cor-texto:#111}\nbody{color:var(--cor-texto)}';
+  assert.strictEqual(reescreveUrlsDoCss(entrada, '/tmp/marca'), entrada);
+});

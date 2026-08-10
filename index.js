@@ -116,6 +116,18 @@ function reescreveReferenciasDoDocumento(html, baseDir, { baseUrl } = {}) {
   return { html: saida, imagensAusentes };
 }
 
+// url() do CSS pertence à MARCA, não ao documento: numa folha de estilo real
+// resolveria contra a própria folha. O prelo perde isso ao inlinar o CSS, então
+// devolve a semântica absolutizando contra o diretório da marca.
+// As três formas de aspas do CSS entram: url(x), url('x'), url("x").
+function reescreveUrlsDoCss(css, brandDir) {
+  return css.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (m, _aspas, ref) => {
+    const alvo = ref.trim();
+    if (!ehReferenciaRelativa(alvo)) return m;
+    return `url("${paraFileUrl(brandDir, alvo)}")`;
+  });
+}
+
 function stripFrontmatter(markdown) {
   if (!markdown.startsWith('---')) return markdown;
   const end = markdown.indexOf('\n---', 3);
@@ -176,5 +188,5 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
 
 module.exports = {
   mdToPdf, buildLocalFontTag, resolveBrandCss,
-  ehReferenciaRelativa, paraFileUrl, reescreveReferenciasDoDocumento,
+  ehReferenciaRelativa, paraFileUrl, reescreveReferenciasDoDocumento, reescreveUrlsDoCss,
 };
