@@ -38,4 +38,16 @@ function contaObjetosImagem(buf) {
   return n;
 }
 
-module.exports = { urisDoPdf, contaAnotacoesLink, contaObjetosImagem };
+// Contar objetos de imagem NÃO distingue imagem resolvida de ícone de quebrado —
+// o ícone também é um objeto de imagem embutido (medido: /Width 14 no Chromium).
+// A largura é o que separa os dois: um PNG de fixture 1x1 sai com /Width 1.
+function largurasDeImagem(buf) {
+  const larguras = new Set();
+  for (const p of pedacos(buf)) {
+    for (const m of p.matchAll(/\/Subtype\s*\/Image[\s\S]{0,300}?\/Width\s+(\d+)/g)) larguras.add(Number(m[1]));
+    for (const m of p.matchAll(/\/Width\s+(\d+)[\s\S]{0,300}?\/Subtype\s*\/Image/g)) larguras.add(Number(m[1]));
+  }
+  return [...larguras];
+}
+
+module.exports = { urisDoPdf, contaAnotacoesLink, contaObjetosImagem, largurasDeImagem };
