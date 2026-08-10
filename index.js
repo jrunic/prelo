@@ -67,6 +67,24 @@ function resolveBrandCss(brandDir) {
   );
 }
 
+// Qualquer coisa com esquema (http:, data:, mailto:, file:...), caminho absoluto,
+// protocolo-relativo (//cdn/...) ou fragmento é responsabilidade de quem escreveu.
+// Só o resto resolve contra uma base.
+const TEM_ESQUEMA = /^[a-z][a-z0-9+.\-]*:/i;
+
+function ehReferenciaRelativa(ref) {
+  if (!ref) return false;
+  if (TEM_ESQUEMA.test(ref)) return false;
+  if (ref.startsWith('/')) return false;   // cobre absoluto e protocolo-relativo
+  if (ref.startsWith('#')) return false;
+  return true;
+}
+
+// new URL faz a codificação percentual (espaço → %20) que 'file://' + caminho não faz.
+function paraFileUrl(baseDir, ref) {
+  return new URL(path.resolve(baseDir, ref), 'file://').href;
+}
+
 function stripFrontmatter(markdown) {
   if (!markdown.startsWith('---')) return markdown;
   const end = markdown.indexOf('\n---', 3);
@@ -125,4 +143,7 @@ async function mdToPdf({ markdown, brand, outputPath, stripFrontmatter: doStrip 
   }
 }
 
-module.exports = { mdToPdf, buildLocalFontTag, resolveBrandCss };
+module.exports = {
+  mdToPdf, buildLocalFontTag, resolveBrandCss,
+  ehReferenciaRelativa, paraFileUrl,
+};
