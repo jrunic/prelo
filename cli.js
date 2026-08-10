@@ -17,6 +17,7 @@ function parseArgs(argv) {
     else if (argv[i] === '--input')   args.input   = argv[++i];
     else if (argv[i] === '--output')  args.output  = argv[++i];
     else if (argv[i] === '--origem')  args.origem  = argv[++i];
+    else if (argv[i] === '--base-url') args.baseUrl = argv[++i];
     else if (argv[i] === '--strip-frontmatter') args.stripFrontmatter = true;
     else if (argv[i] === '--help' || argv[i] === '-h') args.help = true;
   }
@@ -35,6 +36,9 @@ Flags (conversão):
   --brand              Identificador da marca (ex: exemplo)
   --input              Caminho para o arquivo Markdown de entrada
   --output             Caminho para o PDF de saída (omitir → stdout)
+  --base-url           URL pública de base para links relativos (ex: https://site.com/docs/).
+                       Sem ela, link relativo vira texto. Não afeta imagens, que
+                       resolvem sempre contra a pasta do arquivo de entrada.
   --strip-frontmatter  Remove o bloco YAML front-matter antes de converter
   --help               Exibe esta ajuda
 
@@ -127,7 +131,16 @@ async function main() {
   const outputPath = args.output ? path.resolve(args.output) : null;
 
   try {
-    const result = await mdToPdf({ markdown, brand: args.brand, outputPath, stripFrontmatter: !!args.stripFrontmatter });
+    const result = await mdToPdf({
+      markdown,
+      brand: args.brand,
+      outputPath,
+      stripFrontmatter: !!args.stripFrontmatter,
+      baseDir: path.dirname(inputPath),
+      baseUrl: args.baseUrl,
+      onAviso: ({ original, resolvido }) =>
+        process.stderr.write(`Aviso: imagem não encontrada: ${original} (resolvido para ${resolvido})\n`),
+    });
     if (outputPath) {
       process.stderr.write(`PDF gerado: ${result}\n`);
     } else {
