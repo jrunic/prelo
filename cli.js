@@ -76,10 +76,14 @@ function copiaPayloadMarca(origem, destino) {
     copiados.push('extra.css');
   }
 
-  const fontsOrigem = path.join(origem, 'fonts');
-  if (fs.existsSync(fontsOrigem) && fs.statSync(fontsOrigem).isDirectory()) {
-    fs.cpSync(fontsOrigem, path.join(destino, 'fonts'), { recursive: true });
-    for (const f of fs.readdirSync(fontsOrigem)) copiados.push(path.join('fonts', f));
+  // Subpastas convencionais do payload. Imagem é incondicional: a via legada
+  // (style.css) também tem seu url() resolvido contra a pasta da marca.
+  for (const sub of ['fonts', 'images']) {
+    const subOrigem = path.join(origem, sub);
+    if (fs.existsSync(subOrigem) && fs.statSync(subOrigem).isDirectory()) {
+      fs.cpSync(subOrigem, path.join(destino, sub), { recursive: true });
+      for (const f of fs.readdirSync(subOrigem)) copiados.push(path.join(sub, f));
+    }
   }
   return copiados;
 }
