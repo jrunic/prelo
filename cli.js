@@ -45,7 +45,7 @@ Flags (conversão):
 Flags (instalar):
   --brand              Identificador da marca a instalar
   --origem             Pasta da marca: config.json + tokens.css (ou style.css legado);
-                       extra.css e fonts/ copiados quando presentes
+                       extra.css, fonts/ e images/ copiados quando presentes
 
 Exemplos:
   prelo --brand exemplo --input relatorio.md --output relatorio.pdf
@@ -54,7 +54,10 @@ Exemplos:
 `.trimStart());
 }
 
-function copiaPayloadMarca(origem, destino) {
+// onAviso recebe o que a função deixou de copiar e por quê. A função não
+// imprime: devolve o achado e quem chama decide — mesmo contrato do onAviso
+// de mdToPdf.
+function copiaPayloadMarca(origem, destino, { onAviso } = {}) {
   const configFile = path.join(origem, 'config.json');
   if (!fs.existsSync(configFile)) {
     throw new Error('pasta de origem deve conter config.json');
@@ -71,9 +74,16 @@ function copiaPayloadMarca(origem, destino) {
   const copiados = [folha, 'config.json'];
 
   const extraFile = path.join(origem, 'extra.css');
-  if (folha === 'tokens.css' && fs.existsSync(extraFile)) {
-    fs.copyFileSync(extraFile, path.join(destino, 'extra.css'));
-    copiados.push('extra.css');
+  if (fs.existsSync(extraFile)) {
+    if (folha === 'tokens.css') {
+      fs.copyFileSync(extraFile, path.join(destino, 'extra.css'));
+      copiados.push('extra.css');
+    } else if (onAviso) {
+      onAviso({
+        arquivo: 'extra.css',
+        motivo: 'a marca usa style.css (legado), onde a camada de extras não se aplica',
+      });
+    }
   }
 
   // Subpastas convencionais do payload. Imagem é incondicional: a via legada
@@ -102,7 +112,10 @@ function instalarBrand(args) {
 
   const destino = path.join(xdgBrandsDir(), args.brand);
   try {
-    copiaPayloadMarca(origem, destino);
+    copiaPayloadMarca(origem, destino, {
+      onAviso: ({ arquivo, motivo }) =>
+        process.stderr.write(`Aviso: ${arquivo} ignorado — ${motivo}\n`),
+    });
   } catch (err) {
     process.stderr.write(`Erro: ${err.message}\n`);
     process.exit(1);
