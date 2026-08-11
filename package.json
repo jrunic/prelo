@@ -1,6 +1,6 @@
 {
   "name": "prelo",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Converte Markdown em PDF com identidade visual de marca",
   "type": "commonjs",
   "main": "index.js",
