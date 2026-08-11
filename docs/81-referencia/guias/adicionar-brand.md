@@ -72,7 +72,9 @@ Uma marca é um `tokens.css` — um bloco de valores — mais um `config.json` c
 
 5. (Opcional) `~/minhas-marcas/acme/extra.css` para a regra que só essa marca tem — um seletor próprio, uma quebra de página específica. Aplicado depois dos tokens, tem a última palavra.
 
-   A marca pode trazer imagens próprias (uma logo, uma marca d'água) na sua pasta e referenciá-las por caminho relativo: `url(logo.png)` resolve contra a pasta da marca, não contra o documento. As três formas valem — `url(x.png)`, `url('x.png')`, `url("x.png")`.
+   A marca pode trazer imagens próprias (uma logo, uma marca d'água) numa subpasta `images/` e referenciá-las por caminho relativo: `url(images/logo.png)` resolve contra a pasta da marca, não contra o documento. As três formas de aspas valem — `url(x)`, `url('x')`, `url("x")`.
+
+   **A imagem precisa estar em `images/`.** Arquivo solto na raiz da pasta da marca não é instalado: o instalador leva a folha, o `config.json`, o `extra.css` e as subpastas `fonts/` e `images/`. A subpasta é a fronteira do payload — é o que impede que rascunho, README da marca e metadado do sistema de arquivos viajem junto.
 
 6. Instale:
 
@@ -80,7 +82,9 @@ Uma marca é um `tokens.css` — um bloco de valores — mais um `config.json` c
    prelo instalar --brand acme --origem ~/minhas-marcas/acme
    ```
 
-   `tokens.css`, `config.json`, `extra.css` e a subpasta `fonts/` são copiados para `~/.local/share/prelo/brands/acme/`.
+   `tokens.css`, `config.json`, `extra.css` e as subpastas `fonts/` e `images/` são copiados para `~/.local/share/prelo/brands/acme/`.
+
+   Marca no formato legado (`style.css`) que traga um `extra.css` recebe um aviso: a camada de extras só existe no modelo de tokens, então o arquivo não é instalado.
 
 ## Verificação
 

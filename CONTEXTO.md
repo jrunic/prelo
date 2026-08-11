@@ -94,6 +94,8 @@ A estrutura visual é da **ferramenta**, não da marca. `resolveBrandCss(brandDi
 2. `<marca>/tokens.css` — a marca inteira, ~25 declarações. Sobrescreve os defaults.
 3. `<marca>/extra.css` — opcional; o seletor que só aquela marca tem. Última palavra.
 
+**Payload da marca:** folha (`tokens.css` ou `style.css`) + `config.json`, mais as subpastas opcionais `fonts/` e `images/`. As subpastas são a fronteira — nada solto na raiz é instalado. Nomes em inglês por coerência com o layout público do payload; ver a ADR local `tokens-como-camada-de-marca.md`.
+
 **Via legada** — marca com `style.css` usa a folha inteira, sem `base.css`. Compromisso permanente: retrocompatibilidade e escape hatch para marca que precise de estrutura própria. Se a marca tem `tokens.css` e `style.css`, **tokens vence**.
 
 Regras que o `test/base-css.test.js` enforça no `base.css`: todo `var(--*)` usado tem default no `:root`; nenhuma cor, família ou peso literal fora do `:root`; comentários balanceados.

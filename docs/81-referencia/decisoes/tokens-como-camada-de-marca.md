@@ -33,7 +33,11 @@ Efeito colateral sobre quem gera marca automaticamente: o gerador precisava emit
 
 1. **A estrutura pertence à ferramenta.** `templates/base.css` é versionado com o prelo e distribuído no upgrade. Nenhum valor de marca é cravado nele: cores, famílias e pesos consomem `var(--*)`, e o bloco `:root` do topo são os defaults.
 
-2. **A marca é um bloco de tokens.** O payload passa a ser `tokens.css` + `config.json` + `fonts/`, com `extra.css` opcional para o seletor que só aquela marca tem.
+2. **A marca é um bloco de tokens.** O payload passa a ser `tokens.css` + `config.json` + `fonts/`, com `extra.css` opcional para o seletor que só aquela marca tem, e `images/` opcional para imagem própria (logo, marca d'água).
+
+   As subpastas são a **fronteira do payload**: o instalador leva o que está nelas e nada solto na raiz da marca, para que rascunho, README e metadado de sistema de arquivos não viajem junto. `images/` foi acrescentada em 2026-08-11.
+
+   O nome em inglês é deliberado, não descuido: o layout do payload é lido por quem consome um repositório público, e `fonts/`, `tokens.css`, `config.json` e `extra.css` já seguem essa convenção. É a exceção de audiência prevista na ADR jedi-labs `20260808-naming-por-audiencia-do-artefato` à convenção PT-BR de nomes de pasta.
 
 3. **Resolução em três camadas**, concatenadas nesta ordem: `base.css` → `tokens.css` → `extra.css`. Cada uma sobrescreve a anterior pela cascata nativa.
 
