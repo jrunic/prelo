@@ -10,6 +10,29 @@ tags: [node, pdf, markdown, puppeteer, cli]
 ---
 
 # CONTEXTO.md — prelo
+## Onde o trabalho acontece
+
+**Pasta de trabalho:** `14-projetos/20260714-criar-prelo` — é lá que a sessão de desenvolvimento abre
+(`jd-claude <agente> criar-prelo`). Quando existe pasta de trabalho, o trabalho é
+feito nela; este repo recebe o que a audiência dele precisa.
+
+| Artefato | Lar canônico |
+|---|---|
+| Roadmap de ciclos (`roadmap.md`) | pasta de trabalho |
+| Spec (`dev-02`) e plano (`dev-03`) | pasta de trabalho, em `11-tarefas/` |
+| Arquivo de apoio de tarefa | pasta de trabalho, em `11-tarefas/` |
+| Diário de sessão | pasta de trabalho, em `91-diario/` |
+| Discussão de negócio, modelo de domínio, glossário | pasta de trabalho |
+| **Código, testes, migrations** | **este repo** |
+| **Documentação do produto** (Diátaxis) | **este repo**, `docs/81-referencia/` |
+| **ADR de contrato da ferramenta** | **este repo**, `docs/81-referencia/decisoes/` |
+| **README, CHANGELOG** | **este repo** |
+
+**Razão:** spec, plano, roadmap e diário são internos — nomeiam cliente, caminho
+do brain e comando de migração. ADR `20260809-spec-e-plano-fora-do-repo-publico`.
+
+**As skills leem esta seção** em vez de inferir por visibilidade do repo. Repo
+que não declara deixa a skill sem informação, e sem informação ela erra.
 
 ## Propósito
 
