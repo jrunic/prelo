@@ -165,3 +165,7 @@ prelo instalar --brand <nome-kebab> --origem <pasta>
 ```
 
 `tokens.css`, `config.json`, `extra.css` e `fonts/` são copiados para o XDG. Passo a passo: `docs/81-referencia/guias/adicionar-brand.md`.
+
+## Restrições
+
+- **Repositório público não nomeia a árvore interna do autor** — nem em documento de trabalho, nem em comentário, nem no texto que documenta essa própria regra. Sem caminho absoluto, sem nome de cliente, sem estrutura de pastas interna. Varredura antes de todo push: `git log -p origin/<branch>..HEAD`. ADR `20260822-repo-declara-onde-o-trabalho-acontece` (decisão 5).
