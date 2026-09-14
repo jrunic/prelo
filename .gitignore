@@ -9,3 +9,7 @@ brands/*/
 
 # índices auto-gerados por domínio (brain tooling) — não versionados no repo público
 docs/81-referencia/INDEX-*.md
+
+# INDEX-<dominio>.md sao gerados pelo jedi-gera-indice-referencia
+docs/INDEX-*.md
+docs/**/INDEX-*.md
