@@ -1,6 +1,6 @@
 /* Exemplo — marca de demonstração do prelo.
    A marca é só este bloco. A estrutura vem de templates/base.css.
-   Vocabulário e defaults: docs/81-referencia/referencias/tokens.md
+   Vocabulário e defaults: docs/referencias/tokens.md
 
    Pesos fixados em 400/500/700 — os que a marca embarca em fonts/.
    O default de --peso-titulo do prelo é 600, que o exemplo não traz. */

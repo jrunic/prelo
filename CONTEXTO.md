@@ -120,7 +120,7 @@ A estrutura visual é da **ferramenta**, não da marca. `resolveBrandCss(brandDi
 
 Regras que o `test/base-css.test.js` enforça no `base.css`: todo `var(--*)` usado tem default no `:root`; nenhuma cor, família ou peso literal fora do `:root`; comentários balanceados.
 
-Vocabulário dos tokens: `docs/81-referencia/referencias/tokens.md`. Raciocínio: `docs/81-referencia/decisoes/tokens-como-camada-de-marca.md`.
+Vocabulário dos tokens: `docs/referencias/tokens.md`. Raciocínio: `docs/decisoes/tokens-como-camada-de-marca.md`.
 
 **Peso demandado ⊆ peso embarcado.** O peso fixado nos `--peso-*` tem de existir em `config.fonts`, senão o Chromium sintetiza a face. `test/cobertura-pesos.test.js` guarda isso usando o valor *efetivo* de cada token (o default do `base.css` é sombreado pelo `tokens.css` da marca).
 
@@ -163,7 +163,7 @@ Escrever `tokens.css` + `config.json` numa pasta qualquer e instalar:
 prelo instalar --brand <nome-kebab> --origem <pasta>
 ```
 
-`tokens.css`, `config.json`, `extra.css` e `fonts/` são copiados para o XDG. Passo a passo: `docs/81-referencia/guias/adicionar-brand.md`.
+`tokens.css`, `config.json`, `extra.css` e `fonts/` são copiados para o XDG. Passo a passo: `docs/guias/adicionar-brand.md`.
 
 ## Restrições
 

@@ -45,7 +45,7 @@ Efeito colateral sobre quem gera marca automaticamente: o gerador precisava emit
 
 5. **A via `style.css` é compromisso permanente, não deprecação.** Marca que traz `style.css` é usada como está, sem `base.css`. É simultaneamente retrocompatibilidade e escape hatch para marca que precise de estrutura própria.
 
-6. **O prelo é dono do vocabulário, não do mapeamento.** Quais tokens existem, o que cada um pinta e o default de ausência são do prelo (`docs/81-referencia/referencias/tokens.md`). O mapeamento de um sistema de design para esses tokens é de quem gera a marca — o prelo não conhece `DESIGN.md`.
+6. **O prelo é dono do vocabulário, não do mapeamento.** Quais tokens existem, o que cada um pinta e o default de ausência são do prelo (`docs/referencias/tokens.md`). O mapeamento de um sistema de design para esses tokens é de quem gera a marca — o prelo não conhece `DESIGN.md`.
 
 7. **Ausência de token é degradação, não erro.** Todo token tem default. Cores de estado degradam para a cor de texto, em vez de um vermelho e um verde inventados: marca sem `error`/`success` renderiza `.alert`/`.ok` como texto normal.
 
@@ -78,6 +78,6 @@ Efeito colateral sobre quem gera marca automaticamente: o gerador precisava emit
 
 ## Referências
 
-- Vocabulário: `docs/81-referencia/referencias/tokens.md`
-- Guia: `docs/81-referencia/guias/adicionar-brand.md`
+- Vocabulário: `docs/referencias/tokens.md`
+- Guia: `docs/guias/adicionar-brand.md`
 - Spec e plano de execução: documentos internos do autor, fora deste repositório.

@@ -33,7 +33,7 @@ prelo --brand exemplo --input relatorio.md --output relatorio.pdf --strip-frontm
 
 Uma marca é um `tokens.css` — um bloco de ~25 valores: cores, famílias, pesos — mais um `config.json` (página, fontes, rodapé). A estrutura visual pertence ao prelo (`templates/base.css`) e chega às marcas pelo upgrade da ferramenta. O repositório inclui `brands/exemplo/` como demonstração.
 
-Marca no formato antigo (`style.css` com a folha inteira) continua funcionando — ver [o guia](docs/81-referencia/guias/adicionar-brand.md).
+Marca no formato antigo (`style.css` com a folha inteira) continua funcionando — ver [o guia](docs/guias/adicionar-brand.md).
 
 Para usar a sua própria marca, instale-a no diretório do usuário:
 
@@ -51,11 +51,11 @@ O prelo procura a marca nesta ordem, parando na primeira que existir:
 
 ## Documentação
 
-- [Visão geral](docs/81-referencia/explicacoes/visao-geral.md) — o quê, para quem, por que Node + Puppeteer
-- [Como instalar](docs/81-referencia/guias/instalar.md)
-- [Como adicionar uma marca](docs/81-referencia/guias/adicionar-brand.md)
-- [Vocabulário de tokens](docs/81-referencia/referencias/tokens.md)
-- [Referência da CLI](docs/81-referencia/referencias/cli.md)
+- [Visão geral](docs/explicacoes/visao-geral.md) — o quê, para quem, por que Node + Puppeteer
+- [Como instalar](docs/guias/instalar.md)
+- [Como adicionar uma marca](docs/guias/adicionar-brand.md)
+- [Vocabulário de tokens](docs/referencias/tokens.md)
+- [Referência da CLI](docs/referencias/cli.md)
 
 ## Referências relativas
 

@@ -1,7 +1,7 @@
 /* base.css — estrutura visual do prelo. Propriedade da ferramenta, versionada com ela.
    Nenhum valor de marca é cravado aqui: tudo consome var(--*).
    O :root abaixo são DEFAULTS — a marca sobrescreve o que quiser em seu tokens.css.
-   Vocabulário completo: docs/81-referencia/referencias/tokens.md */
+   Vocabulário completo: docs/referencias/tokens.md */
 
 :root {
   /* Tipografia — famílias */
