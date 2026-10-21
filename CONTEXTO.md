@@ -155,6 +155,8 @@ node scripts/download-fonts.js --url "<googleFontsUrl>" --dest <marca>/fonts
 
 `npm run fonts` roda essa ferramenta para a marca `exemplo`.
 
+O script baixa o subset latino e **não sobrescreve** arquivo existente: para regerar fonte de marca já contaminada (cirílico, latin-ext), apagar o `.woff2` antes. Conferir o resultado com `fc-query -f '%{charset}' <arquivo>` — deve conter `20-7e`.
+
 ## Adicionar nova marca
 
 Escrever `tokens.css` + `config.json` numa pasta qualquer e instalar:
