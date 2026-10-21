@@ -30,16 +30,32 @@ function fetch(url, headers = {}) {
 
 function parseFontFaces(css) {
   const faces = [];
-  const re = /@font-face\s*\{([^}]+)\}/g;
+  const re = /(?:\/\*\s*([\w-]+)\s*\*\/\s*)?@font-face\s*\{([^}]+)\}/g;
   let m;
   while ((m = re.exec(css)) !== null) {
-    const block = m[1];
+    const block = m[2];
     const family = (block.match(/font-family:\s*['"]?([^'";]+)['"]?/) || [])[1]?.trim();
     const weight = (block.match(/font-weight:\s*(\d+)/) || [])[1]?.trim();
     const url    = (block.match(/url\(([^)]+\.woff2)\)/) || [])[1]?.trim();
-    if (family && weight && url) faces.push({ family, weight, url });
+    const range  = (block.match(/unicode-range:\s*([^;]+)/) || [])[1]?.trim();
+    if (family && weight && url) faces.push({ family, weight, url, subset: m[1] || null, range: range || null });
   }
   return faces;
+}
+
+// O Google serve um @font-face por subset (cyrillic-ext vem primeiro, latin depois).
+// Para cada família+peso fica o subset latino: comentário /* latin */ ou unicode-range
+// que cobre U+0000-00FF; sem nenhum dos dois, a primeira face.
+const isLatin = (face) => face.subset === 'latin' || /U\+0000-00FF/i.test(face.range || '');
+
+function pickLatinFaces(faces) {
+  const chosen = new Map();
+  for (const face of faces) {
+    const key = toFilename(face.family, face.weight);
+    const atual = chosen.get(key);
+    if (!atual || (!isLatin(atual) && isLatin(face))) chosen.set(key, face);
+  }
+  return [...chosen.values()];
 }
 
 const toFilename = (family, weight) => `${family.toLowerCase().replace(/\s+/g, '-')}-${weight}.woff2`;
@@ -74,7 +90,7 @@ async function main() {
     perdas.push(`pesos não-400 indisponíveis para: ${fams.join(', ')}`);
     ({ status, css } = await fetchCss(narrowUrl(fams)));
   }
-  const faces = status < 400 ? parseFontFaces(css) : [];
+  const faces = status < 400 ? pickLatinFaces(parseFontFaces(css)) : [];
   if (!faces.length) {
     process.stderr.write('Erro: nenhuma @font-face obtida (fonte proprietária? reportar lacuna).\n');
     process.exit(1);
@@ -104,4 +120,4 @@ if (require.main === module) {
   main().catch(err => { process.stderr.write(`Erro: ${err.message}\n`); process.exit(1); });
 }
 
-module.exports = { toFilename, parseFontFaces, familiesFromUrl, narrowUrl };
+module.exports = { toFilename, parseFontFaces, pickLatinFaces, familiesFromUrl, narrowUrl };
